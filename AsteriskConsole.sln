@@ -1,0 +1,38 @@
+
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.31903.59
+
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Asterisk.NET", "Common\Asterisk.NET\Asterisk.NET.csproj", "{BC6E7DBA-C05A-45FE-A2A3-B1637CE16274}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualAsterisk.Core", "VisualAsterisk.Core\VisualAsterisk.Core.csproj", "{74D569DD-15F8-43C2-B2A2-3F1DF30497C5}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VisualAsterisk.Asterisk", "VisualAsterisk.Asterisk\VisualAsterisk.Asterisk.csproj", "{C4673D76-6A90-4C9E-9EA2-96603C772351}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AsteriskConsole.Web", "src\AsteriskConsole.Web\AsteriskConsole.Web.csproj", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
+
+Global
+    GlobalSection(SolutionConfigurationPlatforms) = preSolution
+        Debug|Any CPU = Debug|Any CPU
+        Release|Any CPU = Release|Any CPU
+    EndGlobalSection
+    GlobalSection(ProjectConfigurationPlatforms) = postSolution
+        {BC6E7DBA-C05A-45FE-A2A3-B1637CE16274}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {BC6E7DBA-C05A-45FE-A2A3-B1637CE16274}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {BC6E7DBA-C05A-45FE-A2A3-B1637CE16274}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {BC6E7DBA-C05A-45FE-A2A3-B1637CE16274}.Release|Any CPU.Build.0 = Release|Any CPU
+        {74D569DD-15F8-43C2-B2A2-3F1DF30497C5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {74D569DD-15F8-43C2-B2A2-3F1DF30497C5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {74D569DD-15F8-43C2-B2A2-3F1DF30497C5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {74D569DD-15F8-43C2-B2A2-3F1DF30497C5}.Release|Any CPU.Build.0 = Release|Any CPU
+        {C4673D76-6A90-4C9E-9EA2-96603C772351}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {C4673D76-6A90-4C9E-9EA2-96603C772351}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {C4673D76-6A90-4C9E-9EA2-96603C772351}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {C4673D76-6A90-4C9E-9EA2-96603C772351}.Release|Any CPU.Build.0 = Release|Any CPU
+        {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}.Release|Any CPU.Build.0 = Release|Any CPU
+    EndGlobalSection
+EndGlobal

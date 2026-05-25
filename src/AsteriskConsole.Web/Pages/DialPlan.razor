@@ -1,0 +1,64 @@
+@page "/dialplan"
+@inject IAsteriskServerService AsteriskService
+
+<PageTitle>Dial Plan — AsteriskConsole</PageTitle>
+
+<h1>Dial Plan</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    <ConfigAccessAlert />
+}
+
+@if (AsteriskService.IsConnected && AsteriskService.HasConfigAccess)
+{
+    var cm = AsteriskService.Server?.ConfigManager;
+    var dialplans = cm?.GetAllDialplanNames()?.ToList() ?? [];
+    <div class="row g-3">
+        <div class="col-md-3">
+            <div class="list-group">
+                @foreach (var name in dialplans)
+                {
+                    <button class="list-group-item list-group-item-action @(_selected == name ? "active" : "")"
+                            @onclick="() => _selected = name">
+                        @name
+                    </button>
+                }
+                @if (!dialplans.Any())
+                {
+                    <div class="list-group-item text-muted">No dial plans</div>
+                }
+            </div>
+        </div>
+        <div class="col-md-9">
+            @if (_selected != null)
+            {
+                var plan = cm?.FindDailPlan(_selected);
+                <div class="card">
+                    <div class="card-header">@_selected</div>
+                    <div class="card-body">
+                        @if (plan != null)
+                        {
+                            <dl class="row">
+                                <dt class="col-3">Context</dt><dd class="col-9"><code>@plan.Context</code></dd>
+                                <dt class="col-3">Name</dt><dd class="col-9">@plan.Name</dd>
+                            </dl>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="text-muted">Select a dial plan to view details.</div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private string? _selected;
+}

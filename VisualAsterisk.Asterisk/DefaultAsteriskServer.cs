@@ -138,7 +138,12 @@ namespace VisualAsterisk.Asterisk
                 }
 
                 Trace.TraceInformation("Getting configurations from server");
-                configManager.Initialize();
+                try { configManager.Initialize(); ConfigLoadError = null; }
+                catch (System.Exception ex)
+                {
+                    ConfigLoadError = ex.Message;
+                    Trace.TraceWarning("Config loading failed (non-fatal): " + ex.Message);
+                }
 
                 Trace.TraceInformation("Initialize internal managers");
                 reportInitializingProgress(null, 80, "Initialize internal managers");
@@ -1023,6 +1028,8 @@ namespace VisualAsterisk.Asterisk
             get { return managerConnection; }
         }
 
+        public string? ConfigLoadError { get; private set; }
+
         public ManagerConnectionInfo ConnectionInfo
         {
             get { return connectionInfo; }
@@ -1176,7 +1183,7 @@ namespace VisualAsterisk.Asterisk
         #endregion
 
 
-        #region IAsteriskServer 成员
+        #region IAsteriskServer 锟斤拷员
         public void ExecuteSystemCommand(string commandToExecute)
         {
             Dictionary<string, string> variables = new Dictionary<string, string>();
@@ -1369,7 +1376,7 @@ namespace VisualAsterisk.Asterisk
 
         #endregion
 
-        #region IAsteriskServer 成员
+        #region IAsteriskServer 锟斤拷员
 
 
         public int ExecuteCommandTimeout
@@ -1386,7 +1393,7 @@ namespace VisualAsterisk.Asterisk
 
         #endregion
 
-        #region IAsteriskServer 成员
+        #region IAsteriskServer 锟斤拷员
 
 
         public string GetConfigFile(string file)

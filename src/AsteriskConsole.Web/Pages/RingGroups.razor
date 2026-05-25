@@ -1,0 +1,44 @@
+@page "/ring-groups"
+@inject IAsteriskServerService AsteriskService
+
+<PageTitle>Ring Groups — AsteriskConsole</PageTitle>
+
+<h1>Ring Groups</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    <ConfigAccessAlert />
+}
+
+@if (AsteriskService.IsConnected && AsteriskService.HasConfigAccess)
+{
+    var groups = AsteriskService.Server?.ConfigManager?.RingGroups?.ToList() ?? [];
+    <div class="card">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-dark">
+                    <tr><th>Extension</th><th>Name</th><th>Strategy</th><th>Members</th></tr>
+                </thead>
+                <tbody>
+                    @if (!groups.Any())
+                    {
+                        <tr><td colspan="4" class="text-center text-muted py-3">No ring groups configured.</td></tr>
+                    }
+                    @foreach (var g in groups)
+                    {
+                        <tr>
+                            <td><strong>@g.Extension</strong></td>
+                            <td>@g.Name</td>
+                            <td>@g.Strategy</td>
+                            <td>@(g.Members?.Count ?? 0)</td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+}

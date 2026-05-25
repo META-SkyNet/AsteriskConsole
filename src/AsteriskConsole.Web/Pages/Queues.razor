@@ -1,0 +1,79 @@
+@page "/queues"
+@inject IAsteriskServerService AsteriskService
+@implements IDisposable
+
+<PageTitle>Queues — AsteriskConsole</PageTitle>
+
+<h1>Queues</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var q in _queues)
+        {
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header fw-bold">@q.Name</div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <div class="fs-4">@(q.Entries?.Count ?? 0)</div>
+                                <small class="text-muted">Waiting</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="fs-4">@(q.Members?.Count ?? 0)</div>
+                                <small class="text-muted">Members</small>
+                            </div>
+                            <div class="col-4">
+                                <div class="fs-4">@(q.Members?.Count(m => m.Value.State == QueueMemberState.DEVICE_NOT_INUSE) ?? 0)</div>
+                                <small class="text-muted">Available</small>
+                            </div>
+                        </div>
+
+                        @if (q.Members?.Count > 0)
+                        {
+                            <hr />
+                            <table class="table table-sm mb-0">
+                                <thead><tr><th>Member</th><th>Status</th><th>Paused</th></tr></thead>
+                                <tbody>
+                                    @foreach (var m in q.Members.Values)
+                                    {
+                                        <tr>
+                                            <td>@m.Location</td>
+                                            <td><span class="badge bg-@(m.State == QueueMemberState.DEVICE_NOT_INUSE ? "success" : "secondary")">@m.State</span></td>
+                                            <td>@(m.Paused ? "Paused" : "")</td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
+        }
+        @if (!_queues.Any())
+        {
+            <div class="col-12"><div class="alert alert-info">No active queues.</div></div>
+        }
+    </div>
+}
+
+@code {
+    private IReadOnlyList<AsteriskQueue> _queues = [];
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+        _timer = new System.Threading.Timer(_ =>
+            InvokeAsync(() => { Refresh(); StateHasChanged(); }), null, 5000, 5000);
+    }
+
+    private void Refresh() => _queues = AsteriskService.GetQueues();
+
+    public void Dispose() => _timer?.Dispose();
+}

@@ -1,0 +1,62 @@
+@page "/voice-menus"
+@inject IAsteriskServerService AsteriskService
+
+<PageTitle>Voice Menus — AsteriskConsole</PageTitle>
+
+<h1>Voice Menus (IVR)</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    <ConfigAccessAlert />
+}
+
+@if (AsteriskService.IsConnected && AsteriskService.HasConfigAccess)
+{
+    var menus = AsteriskService.Server?.ConfigManager?.VoiceMenus?.ToList() ?? [];
+    <div class="row g-3">
+        <div class="col-md-4">
+            <div class="list-group">
+                @foreach (var m in menus)
+                {
+                    <button class="list-group-item list-group-item-action @(_selected?.Name == m.Name ? "active" : "")"
+                            @onclick="() => _selected = m">
+                        @m.Name
+                    </button>
+                }
+                @if (!menus.Any()) { <div class="list-group-item text-muted">No voice menus configured.</div> }
+            </div>
+        </div>
+        <div class="col-md-8">
+            @if (_selected != null)
+            {
+                <div class="card">
+                    <div class="card-header fw-bold">@_selected.Name</div>
+                    <div class="card-body">
+                        <dl class="row">
+                            <dt class="col-3">Extension</dt><dd class="col-9">@_selected.Extension</dd>
+                            <dt class="col-3">Context</dt><dd class="col-9"><code>@_selected.Context</code></dd>
+                        </dl>
+                        <h6>Key Press Actions</h6>
+                        <table class="table table-sm">
+                            <thead><tr><th>Key</th><th>Type</th><th>Action</th></tr></thead>
+                            <tbody>
+                                @foreach (var kv in _selected.KeyPressActions ?? new Dictionary<string, VocieMenuKeyPressEvent>())
+                                {
+                                    <tr><td><kbd>@kv.Key</kbd></td><td>@kv.Value.Type</td><td>@kv.Value.Action</td></tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    private VisualAsterisk.Asterisk.Config.Configuration.VoiceMenu? _selected;
+}

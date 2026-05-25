@@ -1,0 +1,130 @@
+@page "/"
+@inject IAsteriskServerService AsteriskService
+@implements IDisposable
+
+<PageTitle>Dashboard — AsteriskConsole</PageTitle>
+
+<h1>Dashboard</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">
+        Not connected to any Asterisk server.
+        <a href="connect" class="alert-link">Configure connection →</a>
+    </div>
+}
+else
+{
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary">
+                <div class="card-body">
+                    <h5 class="card-title">Active Channels</h5>
+                    <p class="display-6">@_channels.Count</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-success">
+                <div class="card-body">
+                    <h5 class="card-title">Queues</h5>
+                    <p class="display-6">@_queues.Count</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-info">
+                <div class="card-body">
+                    <h5 class="card-title">Parked Calls</h5>
+                    <p class="display-6">@_parkedCalls.Count</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-bg-secondary">
+                <div class="card-body">
+                    <h5 class="card-title">SIP Peers</h5>
+                    <p class="display-6">@_peers.Count</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Active Channels</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead><tr><th>Channel</th><th>Caller ID</th><th>State</th></tr></thead>
+                        <tbody>
+                            @foreach (var ch in _channels.Take(10))
+                            {
+                                <tr>
+                                    <td><code>@ch.Name</code></td>
+                                    <td>@ch.Account</td>
+                                    <td><span class="badge bg-secondary">@ch.State</span></td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Queue Status</div>
+                <div class="card-body p-0">
+                    <table class="table table-sm table-hover mb-0">
+                        <thead><tr><th>Queue</th><th>Waiting</th><th>Members</th></tr></thead>
+                        <tbody>
+                            @foreach (var q in _queues)
+                            {
+                                <tr>
+                                    <td>@q.Name</td>
+                                    <td>@(q.Entries?.Count ?? 0)</td>
+                                    <td>@(q.Members?.Count ?? 0)</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    private IReadOnlyList<AsteriskChannel> _channels = [];
+    private IReadOnlyList<AsteriskQueue> _queues = [];
+    private IReadOnlyList<ParkedCall> _parkedCalls = [];
+    private IReadOnlyList<AsteriskPeer> _peers = [];
+    private System.Threading.Timer? _refreshTimer;
+
+    protected override void OnInitialized()
+    {
+        AsteriskService.StateChanged += OnStateChanged;
+        Refresh();
+        _refreshTimer = new System.Threading.Timer(_ =>
+            InvokeAsync(() => { Refresh(); StateHasChanged(); }), null, 5000, 5000);
+    }
+
+    private void Refresh()
+    {
+        _channels = AsteriskService.GetActiveChannels();
+        _queues = AsteriskService.GetQueues();
+        _parkedCalls = AsteriskService.GetParkedCalls();
+        _peers = AsteriskService.GetPeers();
+    }
+
+    private void OnStateChanged(object? sender, string state)
+    {
+        InvokeAsync(() => { Refresh(); StateHasChanged(); });
+    }
+
+    public void Dispose()
+    {
+        _refreshTimer?.Dispose();
+        AsteriskService.StateChanged -= OnStateChanged;
+    }
+}

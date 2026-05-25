@@ -1,0 +1,88 @@
+@page "/connect"
+@inject IAsteriskServerService AsteriskService
+@inject Microsoft.Extensions.Configuration.IConfiguration Config
+
+<PageTitle>Connection — AsteriskConsole</PageTitle>
+
+<h1>Asterisk Connection</h1>
+
+<div class="card" style="max-width: 480px">
+    <div class="card-body">
+        @if (!string.IsNullOrEmpty(_error))
+        {
+            <div class="alert alert-danger">@_error</div>
+        }
+        @if (_success)
+        {
+            <div class="alert alert-success">Connected successfully!</div>
+        }
+
+        <div class="mb-3">
+            <label class="form-label">Host</label>
+            <input class="form-control" @bind="_host" placeholder="192.168.1.1" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">AMI Port</label>
+            <input class="form-control" type="number" @bind="_port" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Username</label>
+            <input class="form-control" @bind="_username" />
+        </div>
+        <div class="mb-3">
+            <label class="form-label">Password</label>
+            <input class="form-control" type="password" @bind="_password" />
+        </div>
+
+        <div class="d-flex gap-2">
+            <button class="btn btn-primary" @onclick="ConnectAsync" disabled="@_connecting">
+                @(_connecting ? "Connecting…" : "Connect")
+            </button>
+            @if (AsteriskService.IsConnected)
+            {
+                <button class="btn btn-outline-danger" @onclick="Disconnect">Disconnect</button>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private string _host = string.Empty;
+    private int _port = 5038;
+    private string _username = string.Empty;
+    private string _password = string.Empty;
+    private bool _connecting;
+    private bool _success;
+    private string _error = string.Empty;
+
+    protected override void OnInitialized()
+    {
+        var section = Config.GetSection("Asterisk");
+        _host = section["Host"] ?? "localhost";
+        _port = int.TryParse(section["Port"], out var p) ? p : 5038;
+        _username = section["Username"] ?? "admin";
+        _password = section["Password"] ?? string.Empty;
+    }
+
+    private async Task ConnectAsync()
+    {
+        _connecting = true;
+        _error = string.Empty;
+        _success = false;
+        try
+        {
+            await AsteriskService.ConnectAsync(_host, _port, _username, _password);
+            if (AsteriskService.IsConnected)
+                _success = true;
+            else
+                _error = AsteriskService.ConnectionError ?? "Connection failed.";
+        }
+        finally { _connecting = false; }
+    }
+
+    private void Disconnect()
+    {
+        AsteriskService.Disconnect();
+        _success = false;
+    }
+}

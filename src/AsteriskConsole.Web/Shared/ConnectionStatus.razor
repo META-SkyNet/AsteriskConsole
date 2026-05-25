@@ -1,0 +1,23 @@
+@inject IAsteriskServerService AsteriskService
+@implements IDisposable
+
+<span class="badge @(AsteriskService.IsConnected ? "bg-success" : "bg-danger")">
+    @(AsteriskService.IsConnected ? "Connected" : "Disconnected")
+</span>
+
+@code {
+    protected override void OnInitialized()
+    {
+        AsteriskService.StateChanged += OnStateChanged;
+    }
+
+    private void OnStateChanged(object? sender, string state)
+    {
+        InvokeAsync(StateHasChanged);
+    }
+
+    public void Dispose()
+    {
+        AsteriskService.StateChanged -= OnStateChanged;
+    }
+}

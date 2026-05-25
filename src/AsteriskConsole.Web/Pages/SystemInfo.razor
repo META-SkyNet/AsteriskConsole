@@ -1,0 +1,55 @@
+@page "/system-info"
+@inject IAsteriskServerService AsteriskService
+
+<PageTitle>System Info — AsteriskConsole</PageTitle>
+
+<h1>System Information</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    var server = AsteriskService.Server;
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Asterisk Server</div>
+                <div class="card-body">
+                    <dl class="row mb-0">
+                        <dt class="col-4">Version</dt>
+                        <dd class="col-8"><code>@server?.Version</code></dd>
+                        <dt class="col-4">State</dt>
+                        <dd class="col-8"><span class="badge bg-success">@server?.State</span></dd>
+                    </dl>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">System Info</div>
+                <div class="card-body">
+                    @{
+                        var info = server?.GetSystemInformation(false);
+                    }
+                    @if (info != null)
+                    {
+                        <dl class="row mb-0">
+                            <dt class="col-4">OS</dt><dd class="col-8">@info.OSVersion</dd>
+                            <dt class="col-4">Uptime</dt><dd class="col-8">@info.Uptime</dd>
+                            <dt class="col-4">Hostname</dt><dd class="col-8">@info.HostName</dd>
+                            <dt class="col-4">Asterisk</dt><dd class="col-8">@info.AsteriskBuild</dd>
+                            <dt class="col-4">Disk</dt><dd class="col-8">@info.DiskUsage</dd>
+                            <dt class="col-4">Memory</dt><dd class="col-8">@info.MemoryUsage</dd>
+                        </dl>
+                    }
+                    else
+                    {
+                        <span class="text-muted">System info unavailable</span>
+                    }
+                </div>
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,118 @@
+@inject IAsteriskServerService AsteriskService
+
+<div class="top-row ps-3 navbar navbar-dark">
+    <div class="container-fluid">
+        <a class="navbar-brand" href="">
+            <img src="img/asterisk.png" height="24" alt="" />
+            AsteriskConsole
+        </a>
+    </div>
+</div>
+
+<input type="checkbox" title="Navigation menu" class="navbar-toggler" />
+
+<div class="nav-scrollable" onclick="document.querySelector('.navbar-toggler').click()">
+    <nav class="flex-column">
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
+                <span class="bi bi-house-door" aria-hidden="true"></span> Dashboard
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="call-monitor">
+                <span class="bi bi-telephone" aria-hidden="true"></span> Call Monitor
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="users">
+                <span class="bi bi-people" aria-hidden="true"></span> Users
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="queues">
+                <span class="bi bi-list-ol" aria-hidden="true"></span> Queues
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="trunks">
+                <span class="bi bi-diagram-3" aria-hidden="true"></span> Trunks
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="dialplan">
+                <span class="bi bi-flow-chart" aria-hidden="true"></span> Dial Plan
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="voice-menus">
+                <span class="bi bi-voicemail" aria-hidden="true"></span> Voice Menus
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="ring-groups">
+                <span class="bi bi-bell" aria-hidden="true"></span> Ring Groups
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="conference">
+                <span class="bi bi-camera-video" aria-hidden="true"></span> Conference
+            </NavLink>
+        </div>
+
+        <hr class="text-white-50" />
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="cdr">
+                <span class="bi bi-table" aria-hidden="true"></span> Call Records
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="logs">
+                <span class="bi bi-journal-text" aria-hidden="true"></span> Logs
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="cli">
+                <span class="bi bi-terminal" aria-hidden="true"></span> Manager CLI
+            </NavLink>
+        </div>
+
+        <hr class="text-white-50" />
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="hardware">
+                <span class="bi bi-cpu" aria-hidden="true"></span> Hardware
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="system-info">
+                <span class="bi bi-info-circle" aria-hidden="true"></span> System Info
+            </NavLink>
+        </div>
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="backup">
+                <span class="bi bi-archive" aria-hidden="true"></span> Backup / Restore
+            </NavLink>
+        </div>
+
+        <hr class="text-white-50" />
+
+        <div class="nav-item px-3">
+            <NavLink class="nav-link" href="connect">
+                <span class="bi bi-plug" aria-hidden="true"></span> Connection
+            </NavLink>
+        </div>
+    </nav>
+</div>

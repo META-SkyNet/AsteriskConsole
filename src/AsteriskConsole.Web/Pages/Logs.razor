@@ -1,0 +1,57 @@
+@page "/logs"
+@inject IAsteriskServerService AsteriskService
+
+<PageTitle>Asterisk Logs — AsteriskConsole</PageTitle>
+
+<h1>Asterisk Logs</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    <div class="card">
+        <div class="card-header d-flex gap-2 align-items-center">
+            <input class="form-control form-control-sm" style="max-width:300px"
+                   @bind="_filter" @bind:event="oninput" placeholder="Filter logs…" />
+            <button class="btn btn-sm btn-outline-secondary" @onclick="LoadLogsAsync">⟳ Reload</button>
+        </div>
+        <div class="card-body p-0">
+            <pre class="m-0 p-3" style="height:600px;overflow-y:auto;background:#1e1e1e;color:#d4d4d4;font-size:12px">@FilteredLog()</pre>
+        </div>
+    </div>
+}
+
+@code {
+    private string _logContent = string.Empty;
+    private string _filter = string.Empty;
+
+    protected override async Task OnInitializedAsync() => await LoadLogsAsync();
+
+    private async Task LoadLogsAsync()
+    {
+        _logContent = string.Empty;
+        if (AsteriskService.Server == null) return;
+        try
+        {
+            await Task.Run(() =>
+            {
+                var lines = AsteriskService.Server.ExecuteCliCommand("core show channels verbose");
+                _logContent = lines != null ? string.Join("\n", lines) : string.Empty;
+            });
+        }
+        catch (Exception ex)
+        {
+            _logContent = "Error loading logs: " + ex.Message;
+        }
+    }
+
+    private string FilteredLog()
+    {
+        if (string.IsNullOrWhiteSpace(_filter)) return _logContent;
+        var filtered = _logContent.Split('\n')
+            .Where(l => l.Contains(_filter, StringComparison.OrdinalIgnoreCase));
+        return string.Join("\n", filtered);
+    }
+}

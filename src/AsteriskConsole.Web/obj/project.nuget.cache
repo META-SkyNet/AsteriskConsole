@@ -1,0 +1,11 @@
+{
+  "version": 2,
+  "dgSpecHash": "Q7HkWSt0erw=",
+  "success": true,
+  "projectFilePath": "D:\\META\\AsteriskConsole\\src\\AsteriskConsole.Web\\AsteriskConsole.Web.csproj",
+  "expectedPackageFiles": [
+    "C:\\Users\\Dell\\.nuget\\packages\\bouncycastle.cryptography\\2.4.0\\bouncycastle.cryptography.2.4.0.nupkg.sha512",
+    "C:\\Users\\Dell\\.nuget\\packages\\ssh.net\\2024.2.0\\ssh.net.2024.2.0.nupkg.sha512"
+  ],
+  "logs": []
+}

@@ -1,0 +1,97 @@
+@page "/backup"
+@inject IAsteriskServerService AsteriskService
+
+<PageTitle>Backup / Restore — AsteriskConsole</PageTitle>
+
+<h1>Backup / Restore</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header fw-bold">Backup Configuration</div>
+                <div class="card-body">
+                    <p class="text-muted">Download the current Asterisk configuration files from the server.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Local save path</label>
+                        <input class="form-control" @bind="_backupPath" placeholder="C:\backups\asterisk" />
+                    </div>
+                    <button class="btn btn-primary" @onclick="BackupAsync" disabled="@_busy">
+                        @(_busy ? "Working…" : "Start Backup")
+                    </button>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header fw-bold">Restore Configuration</div>
+                <div class="card-body">
+                    <p class="text-muted">Upload and apply configuration files to the Asterisk server.</p>
+                    <div class="mb-3">
+                        <label class="form-label">Local backup path</label>
+                        <input class="form-control" @bind="_restorePath" placeholder="C:\backups\asterisk" />
+                    </div>
+                    <button class="btn btn-warning" @onclick="RestoreAsync" disabled="@_busy">
+                        @(_busy ? "Working…" : "Restore")
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        @if (!string.IsNullOrEmpty(_message))
+        {
+            <div class="col-12">
+                <div class="alert alert-@(_isError ? "danger" : "success")">@_message</div>
+            </div>
+        }
+    </div>
+}
+
+@code {
+    private string _backupPath = string.Empty;
+    private string _restorePath = string.Empty;
+    private bool _busy;
+    private string _message = string.Empty;
+    private bool _isError;
+
+    private async Task BackupAsync()
+    {
+        _busy = true;
+        _message = string.Empty;
+        try
+        {
+            await Task.Run(() => AsteriskService.Server?.CreateBackup(_backupPath));
+            _message = "Backup completed successfully.";
+            _isError = false;
+        }
+        catch (Exception ex)
+        {
+            _message = "Backup failed: " + ex.Message;
+            _isError = true;
+        }
+        finally { _busy = false; }
+    }
+
+    private async Task RestoreAsync()
+    {
+        _busy = true;
+        _message = string.Empty;
+        try
+        {
+            await Task.Run(() => AsteriskService.Server?.RestoreConfig(_restorePath));
+            _message = "Restore completed. Asterisk may need to be reloaded.";
+            _isError = false;
+        }
+        catch (Exception ex)
+        {
+            _message = "Restore failed: " + ex.Message;
+            _isError = true;
+        }
+        finally { _busy = false; }
+    }
+}

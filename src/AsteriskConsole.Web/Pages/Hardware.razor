@@ -1,0 +1,17 @@
+@page "/hardware"
+@inject IAsteriskServerService AsteriskService
+
+<PageTitle>Hardware — AsteriskConsole</PageTitle>
+
+<h1>Hardware</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    <div class="alert alert-info">
+        Hardware monitoring requires direct server access. Use the <a href="/system-info">System Info</a> page for available metrics.
+    </div>
+}

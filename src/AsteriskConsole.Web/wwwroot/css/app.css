@@ -1,0 +1,130 @@
+html, body {
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.page {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+}
+
+.sidebar {
+    background-image: linear-gradient(180deg, #2d2d2d 0%, #1a1a2e 70%);
+    min-height: 100vh;
+    width: 250px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    overflow-y: auto;
+    z-index: 1000;
+}
+
+.top-row {
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #d6d5d5;
+    height: 3.5rem;
+    display: flex;
+    align-items: center;
+}
+
+.content {
+    padding-top: 1.1rem;
+}
+
+main {
+    flex: 1;
+    margin-left: 250px;
+}
+
+.nav-scrollable {
+    height: calc(100vh - 3.5rem);
+    overflow-y: auto;
+}
+
+.navbar-toggler {
+    appearance: none;
+    cursor: pointer;
+    width: 3.5rem;
+    height: 3.5rem;
+    color: white;
+    position: absolute;
+    top: 0;
+    right: 0.1rem;
+    display: none;
+}
+
+.navbar-brand {
+    font-size: 1.1rem;
+    color: white !important;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.nav-item {
+    font-size: 0.9rem;
+}
+
+.nav-item .nav-link {
+    color: #ccc;
+    border-radius: 4px;
+    padding: 0.5rem 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    transition: background 0.15s, color 0.15s;
+}
+
+.nav-item .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    color: white;
+}
+
+.nav-item .nav-link.active {
+    background-color: rgba(255, 140, 0, 0.25);
+    color: #ff8c00;
+    font-weight: 600;
+}
+
+.nav-item hr {
+    border-color: rgba(255,255,255,0.15);
+    margin: 0.5rem 1rem;
+}
+
+#blazor-error-ui {
+    background: #ff8c00;
+    bottom: 0;
+    box-shadow: 0 -1px 2px rgba(0, 0, 0, 0.2);
+    display: none;
+    left: 0;
+    padding: 0.6rem 1.25rem 0.7rem;
+    position: fixed;
+    width: 100%;
+    z-index: 1000;
+}
+
+#blazor-error-ui .dismiss {
+    cursor: pointer;
+    position: absolute;
+    right: 0.75rem;
+    top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        height: auto;
+        min-height: unset;
+        position: relative;
+    }
+    main { margin-left: 0; }
+    .page { flex-direction: column; }
+    .navbar-toggler { display: block; }
+    .nav-scrollable {
+        display: none;
+        height: auto;
+    }
+    .navbar-toggler:checked ~ .nav-scrollable {
+        display: block;
+    }
+}

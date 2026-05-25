@@ -1,0 +1,15 @@
+@inject IAsteriskServerService AsteriskService
+
+@if (AsteriskService.IsConnected && !AsteriskService.HasConfigAccess)
+{
+    <div class="alert alert-warning d-flex align-items-start gap-2 mb-4">
+        <i class="bi bi-lock-fill fs-5 mt-1"></i>
+        <div>
+            <strong>Không có quyền truy cập cấu hình</strong><br />
+            Tài khoản AMI hiện tại không có quyền <code>config</code> để đọc file cấu hình Asterisk.
+            Trang này bị tắt cho đến khi được cấp quyền.<br />
+            <small class="text-muted">Chi tiết: @AsteriskService.ConfigAccessError</small><br />
+            <small>Liên hệ admin để thêm quyền <code>config</code> cho AMI user trong <code>/etc/asterisk/manager.conf</code>.</small>
+        </div>
+    </div>
+}

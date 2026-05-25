@@ -1,7 +1,8 @@
-﻿using System;
+﻿// Replaced by SSH.NET (Renci.SshNet) — Granados event receiver no longer needed.
+#if false
+using System;
 using System.Collections.Generic;
 using System.Text;
-using Granados;
 using System.Diagnostics;
 using System.Threading;
 
@@ -216,3 +217,4 @@ namespace VisualAsterisk.Core.SSH
         public SSHChannel _pf;
     }
 }
+#endif

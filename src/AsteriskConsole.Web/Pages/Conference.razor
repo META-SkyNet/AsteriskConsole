@@ -1,0 +1,62 @@
+@page "/conference"
+@inject IAsteriskServerService AsteriskService
+@implements IDisposable
+
+<PageTitle>Conference — AsteriskConsole</PageTitle>
+
+<h1>Conference Rooms</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    <div class="row g-3">
+        @foreach (var room in _rooms)
+        {
+            <div class="col-md-4">
+                <div class="card">
+                    <div class="card-header">
+                        <span class="fw-bold">Room @room.RoomNumber</span>
+                        <span class="badge bg-primary float-end">@(room.GetUsers()?.Count ?? 0) users</span>
+                    </div>
+                    <div class="card-body p-0">
+                        <ul class="list-group list-group-flush">
+                            @foreach (var user in room.GetUsers() ?? [])
+                            {
+                                <li class="list-group-item small">
+                                    <strong>@user.Channel?.Name</strong> — #@user.UserNumber
+                                    @if (user.IsMuted) { <span class="badge bg-warning ms-1">Muted</span> }
+                                </li>
+                            }
+                            @if (!(room.GetUsers()?.Count > 0))
+                            {
+                                <li class="list-group-item text-muted">Empty</li>
+                            }
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        }
+        @if (!_rooms.Any())
+        {
+            <div class="col-12"><div class="alert alert-info">No active conference rooms.</div></div>
+        }
+    </div>
+}
+
+@code {
+    private IReadOnlyList<AsteriskMeetMeRoom> _rooms = [];
+    private System.Threading.Timer? _timer;
+
+    protected override void OnInitialized()
+    {
+        Refresh();
+        _timer = new System.Threading.Timer(_ =>
+            InvokeAsync(() => { Refresh(); StateHasChanged(); }), null, 3000, 3000);
+    }
+
+    private void Refresh() => _rooms = AsteriskService.GetMeetMeRooms();
+    public void Dispose() => _timer?.Dispose();
+}

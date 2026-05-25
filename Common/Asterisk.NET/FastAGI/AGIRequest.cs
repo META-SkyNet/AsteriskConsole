@@ -1,6 +1,5 @@
 using System;
 using System.IO;
-using System.Web;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Collections;
@@ -514,12 +513,12 @@ namespace Asterisk.NET.FastAGI
 				int i = parameter.IndexOf('=');
 				if (i > 0)
 				{
-					name = HttpUtility.UrlDecode(parameter.Substring(0, i));
+					name = System.Net.WebUtility.UrlDecode(parameter.Substring(0, i));
 					if (parameter.Length > i + 1)
-						val = HttpUtility.UrlDecode(parameter.Substring(i + 1));
+						val = System.Net.WebUtility.UrlDecode(parameter.Substring(i + 1));
 				}
 				else if (i < 0)
-					name = HttpUtility.UrlDecode(parameter);
+					name = System.Net.WebUtility.UrlDecode(parameter);
 				else
 					continue;
 

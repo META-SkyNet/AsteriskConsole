@@ -1,0 +1,60 @@
+@page "/cli"
+@inject IAsteriskServerService AsteriskService
+
+<PageTitle>Manager CLI — AsteriskConsole</PageTitle>
+
+<h1>Manager CLI</h1>
+
+@if (!AsteriskService.IsConnected)
+{
+    <div class="alert alert-warning">Not connected. <a href="connect">Connect →</a></div>
+}
+else
+{
+    <div class="card">
+        <div class="card-body p-0">
+            <pre class="m-0 p-3" style="height:450px;overflow-y:auto;background:#1e1e1e;color:#d4d4d4;font-size:12px"
+                 @ref="_outputRef">@_output</pre>
+        </div>
+        <div class="card-footer">
+            <div class="input-group">
+                <span class="input-group-text text-success fw-bold">asterisk*CLI&gt;</span>
+                <input class="form-control font-monospace" @bind="_command"
+                       @onkeydown="OnKeyDown" placeholder="Enter AMI command…" />
+                <button class="btn btn-primary" @onclick="ExecuteAsync" disabled="@_running">Send</button>
+            </div>
+            <small class="text-muted">Examples: <code>core show channels</code> · <code>sip show peers</code> · <code>queue show</code></small>
+        </div>
+    </div>
+}
+
+@code {
+    private string _command = string.Empty;
+    private string _output = string.Empty;
+    private bool _running;
+    private ElementReference _outputRef;
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter") await ExecuteAsync();
+    }
+
+    private async Task ExecuteAsync()
+    {
+        if (string.IsNullOrWhiteSpace(_command) || AsteriskService.Server == null) return;
+        var cmd = _command.Trim();
+        _command = string.Empty;
+        _running = true;
+        try
+        {
+            _output += $"\nasterisk*CLI> {cmd}\n";
+            var result = await Task.Run(() => AsteriskService.Server.ExecuteCliCommand(cmd));
+            _output += result + "\n";
+        }
+        catch (Exception ex)
+        {
+            _output += $"Error: {ex.Message}\n";
+        }
+        finally { _running = false; }
+    }
+}
