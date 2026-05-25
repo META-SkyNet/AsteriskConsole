@@ -10,7 +10,8 @@ namespace AsteriskConsole.Web.Services
         bool HasConfigAccess { get; }
         string? ConfigAccessError { get; }
 
-        Task ConnectAsync(string host, int port, string username, string password);
+        Task ConnectAsync(string host, int port, string username, string password, int timeoutSeconds = 20);
+        Task<(bool ok, string message)> TestConnectionAsync(string host, int port, int timeoutMs = 3000);
         void Disconnect();
 
         IReadOnlyList<AsteriskChannel> GetActiveChannels();

@@ -4,43 +4,97 @@
 
 <PageTitle>Connection — AsteriskConsole</PageTitle>
 
-<h1>Asterisk Connection</h1>
+<h1>Kết nối Asterisk AMI</h1>
 
-<div class="card" style="max-width: 480px">
+<div class="card" style="max-width: 520px">
     <div class="card-body">
+
         @if (!string.IsNullOrEmpty(_error))
         {
-            <div class="alert alert-danger">@_error</div>
+            <div class="alert alert-danger d-flex align-items-start gap-2">
+                <i class="bi bi-exclamation-triangle-fill fs-5 mt-1 flex-shrink-0"></i>
+                <div class="flex-grow-1">
+                    <strong>Kết nối thất bại</strong><br />
+                    <span class="small">@_error</span>
+                </div>
+            </div>
         }
-        @if (_success)
+        @if (!string.IsNullOrEmpty(_testResult))
         {
-            <div class="alert alert-success">Connected successfully!</div>
+            <div class="alert alert-@(_testOk ? "success" : "warning") d-flex align-items-center gap-2 py-2">
+                <i class="bi bi-@(_testOk ? "check-circle-fill" : "x-circle-fill")"></i>
+                <span class="small">@_testResult</span>
+            </div>
+        }
+        @if (AsteriskService.IsConnected)
+        {
+            <div class="alert alert-success d-flex align-items-center gap-2 py-2">
+                <i class="bi bi-check-circle-fill"></i>
+                <span>Đang kết nối tới <strong>@_host:@_port</strong></span>
+            </div>
         }
 
         <div class="mb-3">
-            <label class="form-label">Host</label>
-            <input class="form-control" @bind="_host" placeholder="192.168.1.1" />
+            <label class="form-label fw-semibold">Host</label>
+            <input class="form-control" @bind="_host" placeholder="192.168.1.1" disabled="@_busy" />
+        </div>
+        <div class="row mb-3">
+            <div class="col-6">
+                <label class="form-label fw-semibold">AMI Port</label>
+                <input class="form-control" type="number" @bind="_port" disabled="@_busy" />
+            </div>
+            <div class="col-6">
+                <label class="form-label fw-semibold">Timeout (giây)</label>
+                <input class="form-control" type="number" @bind="_timeout" min="5" max="60" disabled="@_busy" />
+            </div>
         </div>
         <div class="mb-3">
-            <label class="form-label">AMI Port</label>
-            <input class="form-control" type="number" @bind="_port" />
+            <label class="form-label fw-semibold">Username</label>
+            <input class="form-control" @bind="_username" disabled="@_busy" />
         </div>
         <div class="mb-3">
-            <label class="form-label">Username</label>
-            <input class="form-control" @bind="_username" />
-        </div>
-        <div class="mb-3">
-            <label class="form-label">Password</label>
-            <input class="form-control" type="password" @bind="_password" />
+            <label class="form-label fw-semibold">Password</label>
+            <input class="form-control" type="password" @bind="_password" disabled="@_busy" />
         </div>
 
-        <div class="d-flex gap-2">
-            <button class="btn btn-primary" @onclick="ConnectAsync" disabled="@_connecting">
-                @(_connecting ? "Connecting…" : "Connect")
+        @if (!string.IsNullOrEmpty(_status))
+        {
+            <div class="d-flex align-items-center gap-2 mb-3 text-muted small">
+                <div class="spinner-border spinner-border-sm" role="status"></div>
+                @_status
+            </div>
+        }
+
+        <div class="d-flex flex-wrap gap-2">
+            <button class="btn btn-sm btn-outline-secondary" @onclick="TestAsync" disabled="@_busy">
+                <i class="bi bi-wifi"></i> Test
             </button>
-            @if (AsteriskService.IsConnected)
+
+            @if (!AsteriskService.IsConnected)
             {
-                <button class="btn btn-outline-danger" @onclick="Disconnect">Disconnect</button>
+                <button class="btn btn-primary" @onclick="ConnectAsync" disabled="@_busy">
+                    @if (_busy)
+                    {
+                        <span class="spinner-border spinner-border-sm me-1"></span>
+                    }
+                    Kết nối
+                </button>
+            }
+            else
+            {
+                <button class="btn btn-outline-danger" @onclick="Disconnect" disabled="@_busy">
+                    <i class="bi bi-plug-fill"></i> Ngắt kết nối
+                </button>
+                <button class="btn btn-outline-primary" @onclick="ReconnectAsync" disabled="@_busy">
+                    <i class="bi bi-arrow-repeat"></i> Kết nối lại
+                </button>
+            }
+
+            @if (!string.IsNullOrEmpty(_error) && !AsteriskService.IsConnected)
+            {
+                <button class="btn btn-warning" @onclick="ConnectAsync" disabled="@_busy">
+                    <i class="bi bi-arrow-repeat"></i> Thử lại
+                </button>
             }
         </div>
     </div>
@@ -49,11 +103,14 @@
 @code {
     private string _host = string.Empty;
     private int _port = 5038;
+    private int _timeout = 20;
     private string _username = string.Empty;
     private string _password = string.Empty;
-    private bool _connecting;
-    private bool _success;
+    private bool _busy;
     private string _error = string.Empty;
+    private string _status = string.Empty;
+    private string _testResult = string.Empty;
+    private bool _testOk;
 
     protected override void OnInitialized()
     {
@@ -64,25 +121,46 @@
         _password = section["Password"] ?? string.Empty;
     }
 
-    private async Task ConnectAsync()
+    private async Task TestAsync()
     {
-        _connecting = true;
-        _error = string.Empty;
-        _success = false;
+        _busy = true;
+        _testResult = string.Empty;
+        _status = $"Đang kiểm tra {_host}:{_port}…";
         try
         {
-            await AsteriskService.ConnectAsync(_host, _port, _username, _password);
-            if (AsteriskService.IsConnected)
-                _success = true;
-            else
-                _error = AsteriskService.ConnectionError ?? "Connection failed.";
+            var (ok, msg) = await AsteriskService.TestConnectionAsync(_host, _port, 3000);
+            _testOk = ok;
+            _testResult = ok ? $"OK — {msg}" : $"Không kết nối được: {msg}";
         }
-        finally { _connecting = false; }
+        finally { _busy = false; _status = string.Empty; }
+    }
+
+    private async Task ConnectAsync()
+    {
+        _busy = true;
+        _error = string.Empty;
+        _testResult = string.Empty;
+        _status = $"Đang kết nối tới {_host}:{_port}…";
+        StateHasChanged();
+        try
+        {
+            await AsteriskService.ConnectAsync(_host, _port, _username, _password, _timeout);
+            if (!AsteriskService.IsConnected)
+                _error = AsteriskService.ConnectionError ?? "Kết nối thất bại.";
+        }
+        finally { _busy = false; _status = string.Empty; }
     }
 
     private void Disconnect()
     {
+        _error = string.Empty;
+        _testResult = string.Empty;
         AsteriskService.Disconnect();
-        _success = false;
+    }
+
+    private async Task ReconnectAsync()
+    {
+        Disconnect();
+        await ConnectAsync();
     }
 }

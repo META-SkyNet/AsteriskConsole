@@ -20,14 +20,23 @@ namespace AsteriskConsole.Web.Services
             _logger = logger;
         }
 
-        public async Task ConnectAsync(string host, int port, string username, string password)
+        public async Task ConnectAsync(string host, int port, string username, string password, int timeoutSeconds = 20)
         {
             try
             {
                 Disconnect();
                 ConnectionError = null;
                 _server = new DefaultAsteriskServer(host, port, username, password);
-                await Task.Run(() => _server.Initialize());
+                using var cts = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+                try
+                {
+                    await Task.Run(() => _server.Initialize()).WaitAsync(cts.Token);
+                }
+                catch (OperationCanceledException) when (cts.IsCancellationRequested)
+                {
+                    _server = null;
+                    throw new TimeoutException($"Kết nối timeout sau {timeoutSeconds}s. Kiểm tra lại host/port.");
+                }
                 _logger.LogInformation("Connected to Asterisk at {Host}:{Port}", host, port);
                 StateChanged?.Invoke(this, "Connected");
             }
@@ -37,6 +46,25 @@ namespace AsteriskConsole.Web.Services
                 ConnectionError = ex.Message;
                 _server = null;
                 StateChanged?.Invoke(this, "ConnectionFailed");
+            }
+        }
+
+        public async Task<(bool ok, string message)> TestConnectionAsync(string host, int port, int timeoutMs = 3000)
+        {
+            try
+            {
+                using var tcp = new System.Net.Sockets.TcpClient();
+                await tcp.ConnectAsync(host, port).WaitAsync(TimeSpan.FromMilliseconds(timeoutMs));
+                var stream = tcp.GetStream();
+                stream.ReadTimeout = 2000;
+                var buf = new byte[64];
+                int n = await stream.ReadAsync(buf, 0, buf.Length).WaitAsync(TimeSpan.FromMilliseconds(2000));
+                var banner = System.Text.Encoding.ASCII.GetString(buf, 0, n).Trim();
+                return (true, banner);
+            }
+            catch (Exception ex)
+            {
+                return (false, ex.Message);
             }
         }
 
