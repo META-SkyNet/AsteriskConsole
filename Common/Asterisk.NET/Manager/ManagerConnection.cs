@@ -2105,14 +2105,13 @@ namespace Asterisk.NET.Manager
 				fireEvent(e);
 		}
 
-		private void eventComplete(IAsyncResult result)
-		{
-		}
-
 		private void fireEvent(ManagerEvent e)
 		{
 			if (enableEvents && internalEvent != null)
-				internalEvent.BeginInvoke(this, e, new AsyncCallback(eventComplete), null);
+			{
+				var handler = internalEvent;
+				System.Threading.Tasks.Task.Run(() => handler(this, e));
+			}
 		}
 		#endregion
 	}
