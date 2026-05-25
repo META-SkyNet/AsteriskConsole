@@ -1231,7 +1231,8 @@ namespace Asterisk.NET.Manager
 #if LOGGER
 				logger.Info("Successfully logged in");
 #endif
-				asteriskVersion = determineVersion();
+				try { asteriskVersion = determineVersion(); }
+				catch { asteriskVersion = AsteriskVersion.ASTERISK_1_6; }
 #if LOGGER
 				logger.Info("Determined Asterisk version: " + asteriskVersion);
 #endif
